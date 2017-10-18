@@ -1,0 +1,61 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0"
+                 servicepoint="rollout-prefix-set">
+      <devices foreach="{/device-group}" xmlns="http://tail-f.com/ns/ncs">
+         <device foreach="{/../../ncs:devices/ncs:device-group[ncs:name=/device-group]/ncs:member}">
+            <name>{.}</name>
+               <config>
+               <!-- DEVICE/NXOS -->      
+                  <ip xmlns="http://tail-f.com/ned/cisco-nx" when="{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/type='ipv4'}">             
+                     <prefix-list>
+                       <prefixes>
+                         <name>{/prefix-set-name}</name>
+                         <seq foreach = "{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/seq}" tags="replace">
+                           <no>{./seq-number}</no>
+                           <permit>{./ipv4/ipv4-prefix}</permit>
+                           <eq>{./ipv4/eq}</eq>
+                           <ge>{./ipv4/ge}</ge>
+                           <le>{./ipv4/le}</le>
+                         </seq>
+                       </prefixes>
+                     </prefix-list>
+                   </ip>
+                  <ipv6 xmlns="http://tail-f.com/ned/cisco-nx" when="{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/type='ipv6'}">
+                     <prefix-list>
+                       <prefixes>
+                         <name>{/prefix-set-name}</name>
+                         <seq foreach = "{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/seq}" tags="replace">
+                           <no>{./seq-number}</no>
+                           <permit>{./ipv6/ipv6-prefix}</permit>
+                           <eq>{./ipv6/eq}</eq>
+                           <ge>{./ipv6/ipv6/ge}</ge>                       
+                           <le>{./ipv6/le}</le>
+                         </seq>
+                       </prefixes>
+                     </prefix-list>
+                   </ipv6>
+
+               <!-- DEVICE/IOSXR -->
+                 <prefix-set xmlns="http://tail-f.com/ned/cisco-ios-xr" when="{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/type='ipv4'}">
+                   <name>{/prefix-set-name}</name>
+                   <set foreach = "{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/seq}" tags="replace">
+                      <value>{concat(substring(concat(./ipv4//ipv4-prefix, " eq ", ./ipv4/eq), 1 div boolean(./ipv4/eq)),
+                      substring(concat(./ipv4/ipv4-prefix, " ge ", ./ipv4/ge," le ", ./ipv4/le), 1 div boolean(boolean(./ipv4/ge) and boolean(./ipv4/le))),
+                      substring(concat(./ipv4/ipv4-prefix, " ge ", ./ipv4/ge), 1 div boolean((boolean(./ipv4/ge)) and not (boolean(./ipv4/le)))),
+                      substring(concat(./ipv4/ipv4-prefix, " le ", ./ipv4/le), 1 div boolean((boolean(./ipv4/le)) and not (boolean(./ipv4//ge)))),
+                      substring(./ipv4/ipv4-prefix, 1 div boolean(not (boolean(./ipv4/eq)) and not (boolean(./ipv4/le)) and not (boolean(./ipv4/ge)))))}</value>
+                   </set>
+                 </prefix-set>
+                 <prefix-set xmlns="http://tail-f.com/ned/cisco-ios-xr" when="{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/type='ipv6'}">
+                   <name>{/prefix-set-name}</name>
+                   <set foreach = "{/../../ncs:services/prefix-set-management:prefix-set-management[prefix-set-name=/prefix-set-name]/seq}" tags="replace">
+                      <value>{concat(substring(concat(./ipv6/ipv6-prefix, " eq ", ./ipv6/eq), 1 div boolean(./ipv6/eq)),
+                      substring(concat(./ipv6/ipv6-prefix, " ge ", ./ipv6/ge," le ", ./ipv6/le), 1 div boolean(boolean(./ipv6/ge) and boolean(./ipv6/le))),
+                      substring(concat(./ipv6/ipv6-prefix, " ge ", ./ipv6/ge), 1 div boolean((boolean(./ipv6/ge)) and not (boolean(./ipv6/le)))),
+                      substring(concat(./ipv6/ipv6-prefix, " le ", ./ipv6/le), 1 div boolean((boolean(./ipv6/le)) and not (boolean(./ipv6/ge)))),
+                      substring(./ipv6/ipv6-prefix, 1 div boolean(not (boolean(./ipv6/eq)) and not (boolean(./ipv6/le)) and not (boolean(./ipv6/ge)))))}</value>
+                   </set>
+                 </prefix-set>
+               </config>
+            </device>
+          </devices>
+</config-template>

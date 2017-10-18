@@ -1,0 +1,89 @@
+module rollout-prefix-set {
+  namespace "http://t-mobile.com/rollout-prefix-set";
+  prefix rollout-prefix-set;
+
+  import tailf-ncs {
+    prefix ncs;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+
+  // =========================================================================
+  // AUTHOR
+  // =========================================================================
+
+  organization "T-Mobile";
+
+  contact
+      "Alexey Stytsenko
+
+       T-Mobile
+       USA
+
+       Phone:
+       EMail: ";
+
+  description
+    "Service to allow rollout of ipv4/ipv6 prefix-set across device-groups";
+
+  // =========================================================================
+  // REVISION
+  // =========================================================================
+
+
+  revision 2017-10-06 {
+    description
+      "Command syntax brushed up";
+  }
+
+  revision 2017-10-04 {
+    description
+      "Initial revision.";
+  }
+
+  // =========================================================================
+  // Service rollout-prefix-set
+  // =========================================================================
+
+
+  augment /ncs:services {
+    list rollout-prefix-set {
+      tailf:cli-delete-when-empty;
+      tailf:cli-compact-syntax;
+      tailf:cli-sequence-commands;
+      tailf:cli-suppress-mode;
+      key "prefix-set-name device-group";
+
+
+      uses ncs:service-data;
+      ncs:servicepoint "rollout-prefix-set";
+
+     // name of the prefix set to rollout
+      leaf prefix-set-name {
+        tailf:cli-incomplete-command;
+        type string {
+        tailf:info "Name of the Prefix set to manage";
+                pattern '([^s].*)|(s[^e].*)|(se[^q].*)'
+                  +'(seq[^u].*)|(sequ[^e].*)|(seque[^n].*)|'
+                  +'(sequen[^c].*)|(sequenc[^e].*)|(sequence'
+                  +'[^\-].*)|(sequence\-[^n].*)|(sequence\-n'
+                  +'[^u].*)|(sequence\-nu[^m].*)|(sequence\-'
+                  +'num[^b].*)|(sequence\-numb[^e].*)|'
+                  +'(sequence\-numbe[^r].*)|(sequence\-number..*)';
+        }
+      }
+         
+      // device group in scope of rollout 
+      // may replace this with other ways of refering to the devices.
+      leaf device-group {
+        tailf:cli-full-command;
+        tailf:cli-optional-in-sequence;
+        type leafref {
+          path "/ncs:devices/ncs:device-group/ncs:name";
+        }
+        tailf:info "Switches/Routers device-group name";
+      }
+    }
+  }
+}
