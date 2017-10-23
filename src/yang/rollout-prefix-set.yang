@@ -9,6 +9,10 @@ module rollout-prefix-set {
     prefix tailf;
   }
 
+  import prefix-set-management {
+        prefix prefix-set-management;
+  }
+
   // =========================================================================
   // AUTHOR
   // =========================================================================
@@ -30,6 +34,12 @@ module rollout-prefix-set {
   // =========================================================================
   // REVISION
   // =========================================================================
+
+
+  revision 2017-10-16 {
+    description
+      "prefix-set-name type changed to leafref";
+  }
 
 
   revision 2017-10-06 {
@@ -62,16 +72,10 @@ module rollout-prefix-set {
      // name of the prefix set to rollout
       leaf prefix-set-name {
         tailf:cli-incomplete-command;
-        type string {
-        tailf:info "Name of the Prefix set to manage";
-                pattern '([^s].*)|(s[^e].*)|(se[^q].*)'
-                  +'(seq[^u].*)|(sequ[^e].*)|(seque[^n].*)|'
-                  +'(sequen[^c].*)|(sequenc[^e].*)|(sequence'
-                  +'[^\-].*)|(sequence\-[^n].*)|(sequence\-n'
-                  +'[^u].*)|(sequence\-nu[^m].*)|(sequence\-'
-                  +'num[^b].*)|(sequence\-numb[^e].*)|'
-                  +'(sequence\-numbe[^r].*)|(sequence\-number..*)';
+        type leafref {
+          path "/ncs:services/prefix-set-management:prefix-set-management/prefix-set-management:prefix-set-name";
         }
+        tailf:info "Name of the prefix set";
       }
          
       // device group in scope of rollout 
